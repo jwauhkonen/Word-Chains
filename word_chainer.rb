@@ -30,12 +30,13 @@ class WordChainer
   
   def run(source, target)
     @current_words = [source]
-    @all_seen_words = [source]
+    @all_seen_words = { source => nil }
     
     until @current_words.empty?
       explore_current_words
-
+      break if @all_seen_words.include?(target)
     end
+    p build_path(target)
   end
   
   def explore_current_words
@@ -45,7 +46,7 @@ class WordChainer
       adjacent_words(current_word).each do |word|
         unless @all_seen_words.include?(word)
           new_current_words << word 
-          @all_seen_words << word
+          @all_seen_words[word] = current_word
         end
       end
     end
@@ -54,9 +55,23 @@ class WordChainer
     @current_words = new_current_words
   end
   
+  def build_path(target)
+    path = [target]
+    path << @all_seen_words[target]
+    
+    loop do
+      if @all_seen_words[path.last].nil?
+        break
+      end
+      
+      path << @all_seen_words[path.last]
+    end
+    path
+  end
+  
 end
 
 
 chainer = WordChainer.new('dictionary.txt')
 
-p chainer.run("breath", "stupid")
+chainer.run("market", "fisher")
